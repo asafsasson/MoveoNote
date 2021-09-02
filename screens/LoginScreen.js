@@ -1,8 +1,10 @@
 import React, { createContext, useState } from 'react'
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, SafeAreaView } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, SafeAreaView,KeyboardAvoidingView } from 'react-native';
 import fire from '../fire'
+import {HideWithKeyboard,ShowWithKeyboard } from 'react-native-hide-with-keyboard';
 
 const LoginScreen = ({ navigation }) => {
+    
     const [email, setEmail] = useState({ value: ''})
     const [password, setPassword] = useState({ value: ''})
 
@@ -15,6 +17,9 @@ const LoginScreen = ({ navigation }) => {
                 fire.auth().onAuthStateChanged(authUser => {
                     if (authUser !== null) {
                         console.log(authUser)
+                        navigation.navigate('HomeScreen', {
+                            currentUser: authUser,
+                          });
                     }
                 })
             })
@@ -35,17 +40,15 @@ const LoginScreen = ({ navigation }) => {
             });
     }
 
-    const signupBtn = () => {
-        console.log("signUp")
-    }
-
 
     return (
         <View style={styles.container}>
+        
             <Image
                 style={styles.logo}
                 source={require('../assets/moveoappLogo.png')}
             />
+            <Text style={styles.headLine}>Welcome to MoveoNote</Text>
             <View style={styles.inputView} >
                 <TextInput
                     style={styles.inputText}
@@ -61,15 +64,10 @@ const LoginScreen = ({ navigation }) => {
                     placeholderTextColor="#003f5c"
                     onChangeText={(text) => setPassword({ value: text })} />
             </View>
-
-            <TouchableOpacity>
-                <Text style={styles.forgot}>Forgot Password?</Text>
-            </TouchableOpacity>
             <TouchableOpacity onPress={loginBtn} style={styles.loginBtn}>
                 <Text style={styles.loginText}>LOGIN</Text>
-
             </TouchableOpacity>
-            <TouchableOpacity  onPress={signupBtn}>
+            <TouchableOpacity onPress={() => navigation.navigate('RegisterScreen')}>
                 <Text style={styles.loginText}>Signup</Text>
             </TouchableOpacity>
         </View>
@@ -87,6 +85,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
 
+    },
+    headLine:{
+        fontWeight: "bold",
+        fontSize: 25,
+        position:'absolute',
+        top:65,
+        color: "#808085",
     },
     logo: {
         width: "50%",
@@ -112,10 +117,6 @@ const styles = StyleSheet.create({
     inputText: {
         height: 70,
 
-    },
-    forgot: {
-        color: "#808080",
-        fontSize: 11
     },
     loginBtn: {
         width: "80%",

@@ -1,27 +1,37 @@
 import React, { createContext, useState } from 'react'
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, SafeAreaView, Modal } from 'react-native';
+import {fire,dbFirestore} from '../fire'
 
 const NoteScreen = ({ route, navigation }) => {
     const { currentUser } = route.params;
     var note = [];
 
     const saveNote = () => {
-        var date = new Date().getDate(); 
-            let month = new Date().getMonth() + 1; 
-            let year = new Date().getFullYear(); 
-            let fullDate=date+"/"+month+"/"+year
+        var date = new Date().getDate();
+        let month = new Date().getMonth() + 1;
+        let year = new Date().getFullYear();
+        let fullDate = date + "/" + month + "/" + year
 
         if (note[1] && note[2] != null) {
-            note[0]=currentUser.uid;
-            note[3]=fullDate;
-            alert(note[0] + " " + note[1] + " " + note[2] + " " + note[3])
+            note[0] = currentUser.uid;
+            note[3] = fullDate;
+            alert("Note added")
+            dbFirestore.collection(note[0])
+            .add({
+                title: note[1],
+                body: note[2],
+                date: note[3]
+            })
+            .catch((err) => {
+                alert("Something went wrong - please try again")
+            })
             navigation.goBack()
-        }
+            }
         else {
             alert("One of the entries is missing")
         }
     }
-
+  
     return (
         <View style={styles.container}>
             <Text style={styles.headLine}>New Note</Text>
@@ -34,7 +44,7 @@ const NoteScreen = ({ route, navigation }) => {
             </View>
             <View style={styles.inputViewBody} >
                 <TextInput
-                    style={styles.inputText}
+                    style={styles.inputTextBody}
                     placeholder="Body..."
                     placeholderTextColor="#003f5c"
                     onChangeText={(text) => note[2] = text} />
@@ -88,6 +98,10 @@ const styles = StyleSheet.create({
     },
     inputText: {
         height: 70,
+
+    },
+    inputTextBody: {
+        height: 350,
 
     },
     newNote: {

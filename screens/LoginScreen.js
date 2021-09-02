@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react'
+import React, { createContext, useState,useEffect } from 'react'
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, SafeAreaView,KeyboardAvoidingView } from 'react-native';
 import fire from '../fire'
 import {HideWithKeyboard,ShowWithKeyboard } from 'react-native-hide-with-keyboard';
@@ -7,6 +7,21 @@ const LoginScreen = ({ navigation }) => {
     
     const [email, setEmail] = useState({ value: ''})
     const [password, setPassword] = useState({ value: ''})
+    var user=null;
+
+  /*   useEffect(() => {
+        autoLogin();
+      }, [autoLogin])
+
+      function autoLogin(){
+        if (user!=null) {
+            alert(user.email)
+        }
+        else{
+            alert("else")
+        }
+      }
+       */
 
     const loginBtn = () => {
         console.log(email.value)
@@ -16,6 +31,7 @@ const LoginScreen = ({ navigation }) => {
             .then(() => {
                 fire.auth().onAuthStateChanged(authUser => {
                     if (authUser !== null) {
+                        user=authUser;
                         console.log(authUser)
                         navigation.navigate('HomeScreen', {
                             currentUser: authUser,

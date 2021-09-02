@@ -1,10 +1,16 @@
-import React, { createContext, useState } from 'react'
+import React, { createContext, useState,useEffect } from 'react'
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, SafeAreaView, Modal } from 'react-native';
 import {fire,dbFirestore} from '../fire'
 
 const NoteScreen = ({ route, navigation }) => {
-    const { currentUser } = route.params;
+    const { currentUser,noteId } = route.params;
     var note = [];
+
+    useEffect(() => {
+        if(noteId!=null){
+            alert(noteId.id)
+        }
+    }, [])
 
     const saveNote = () => {
         var date = new Date().getDate();

@@ -14,8 +14,7 @@ const HomeScreen = ({ route, navigation }) => {
     const Tab = createBottomTabNavigator();
     const { currentUser } = route.params;
     const [notes, setNotes] = useState(null)
-
-    const [count, setCount] = useState(0);
+    
 
     useEffect(() => {
         getNotes()
@@ -25,6 +24,9 @@ const HomeScreen = ({ route, navigation }) => {
         let userNotes = [];
         dbFirestore.collection(currentUser.uid)
             .onSnapshot(docs => {
+                if(docs.size==0){
+                    setNotes(null)
+                }
                 docs.forEach(doc => {
                     let N = {
                         id: doc.id,
@@ -37,32 +39,32 @@ const HomeScreen = ({ route, navigation }) => {
                         setNotes(userNotes)
                         console.log(userNotes)
                     }
-
                 })
             })
+          
     }
 
     function deleteNote(currentDoc) {
-        dbFirestore.collection(currentUser.uid).doc(currentDoc.id).delete().then(() => {
-            getNotes();
-        }).catch((error) => {
+        dbFirestore.collection(currentUser.uid).doc(currentDoc.id).delete()
+        .catch((error) => {
             console.error("Error removing document: ", error);
         });
+        getNotes();
     }
 
 
     function List() {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ScrollView>
+                <ScrollView style={{marginTop:10}}>
                     {notes != null ? notes.map((item, i) =>
                         <Card style={styles.shadow}>
                             <View style={styles.user}>
                                 <Card.Content style={{ flex: 1, flexDirection: "column" }}>
                                     <Text style={styles.title}>{item.title}</Text>
                                     <Text style={styles.body}>{item.body}</Text>
-                                    <FontAwesome style={styles.edit} name="edit" size={32} color="rgb(50, 191, 104)" />
-                                    <MaterialIcons onPress={() => { deleteNote(item) }} style={styles.delete} name="delete-outline" size={36} color="rgb(191, 50, 76)" />
+                                    <FontAwesome  onPress={() => { newNote(item) }} style={styles.edit} name="edit" size={32} color="rgb(50, 191, 104)" />
+                                     <MaterialIcons onPress={() => { deleteNote(item) }} style={styles.delete} name="delete-outline" size={36} color="rgb(191, 50, 76)" /> 
                                 </Card.Content>
                             </View>
                         </Card>
@@ -78,10 +80,20 @@ const HomeScreen = ({ route, navigation }) => {
         );
     }
 
-    function newNote() {
-        navigation.navigate('NoteScreen', {
-            currentUser: currentUser,
-        });
+    function newNote(currentNote) {
+        if(currentNote.id){
+            navigation.navigate('NoteScreen', {
+                currentUser: currentUser,
+                noteId: currentNote,
+            }); 
+        }
+        else{
+            navigation.navigate('NoteScreen', {
+                currentUser: currentUser,
+                noteId: null,
+            }); 
+        }
+       
     }
 
     function Map() {
@@ -190,12 +202,13 @@ const styles = StyleSheet.create({
     edit: {
         position: 'relative',
         left: "90%",
-        bottom: "35%"
+        bottom: "15%"
     },
     delete: {
         position: 'relative',
         left: "70%",
-        bottom: "64%"
+        bottom: "44%",
+        width:30
     }
 
 

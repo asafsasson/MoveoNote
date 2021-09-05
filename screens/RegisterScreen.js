@@ -1,5 +1,5 @@
 import React, {useState } from 'react'
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image,Alert,AsyncStorage } from 'react-native';
 import fire from '../fire'
 
 
@@ -15,7 +15,14 @@ const RegisterScreen = ({ navigation }) => {
             fire
                 .auth()
                 .createUserWithEmailAndPassword(email.value, password.value)
-                .then(function (user) {
+                .then(async function (user) {
+                        try {
+                            await AsyncStorage.setItem('@email', email.value)
+                            await AsyncStorage.setItem('@password', password.value)
+                        } catch (e) {
+                            console.log(e)
+                        }
+                    
                     console.log(user);
                     navigation.navigate('LoginScreen')
                    
@@ -25,8 +32,14 @@ const RegisterScreen = ({ navigation }) => {
                         case "auth/email-already-in-use":
                         case "auth/invalid-email":
                         case "auth/weak-password":
-                            alert(err.message);
-                            flag = false;
+                            Alert.alert(
+                                '👓',
+                                err.message,
+                                [
+                                    { text: 'Ok' },
+                                ],
+                                { cancelable: false },
+                            );
                             break;
                     }
                 });
@@ -34,7 +47,15 @@ const RegisterScreen = ({ navigation }) => {
         else{
             console.log(password)
             console.log(passwordValidator)
-            alert("The passwords you entered do not match")
+            Alert.alert(
+                '👓',
+                'The passwords you entered do not match ',
+                [
+                    { text: 'Ok' },
+                ],
+                { cancelable: false },
+            );
+           
         }
     }
 
@@ -45,14 +66,14 @@ const RegisterScreen = ({ navigation }) => {
                 style={styles.logo}
                 source={require('../assets/moveoappLogo.png')}
             />
-            <View style={styles.inputView} >
+            <View style={styles.inputView1} >
                 <TextInput
                     style={styles.inputText}
                     placeholder="Email..."
                     placeholderTextColor="#003f5c"
                     onChangeText={(text) => setEmail({ value: text })} />
             </View>
-            <View style={styles.inputView} >
+            <View style={styles.inputView2} >
                 <TextInput
                     secureTextEntry
                     style={styles.inputText}
@@ -60,7 +81,7 @@ const RegisterScreen = ({ navigation }) => {
                     placeholderTextColor="#003f5c"
                     onChangeText={(text) => setPassword({ value: text })} />
             </View>
-            <View style={styles.inputView} >
+            <View style={styles.inputView3} >
                 <TextInput
                     secureTextEntry
                     style={styles.inputText}
@@ -71,7 +92,7 @@ const RegisterScreen = ({ navigation }) => {
             <TouchableOpacity onPress={signup} style={styles.signup}>
                 <Text style={styles.loginText}>Register</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
+            <TouchableOpacity style={styles.goBack} onPress={() => navigation.navigate('LoginScreen')}>
                 <Text style={styles.loginText}>Go back</Text>
             </TouchableOpacity>
         </View>
@@ -98,9 +119,10 @@ const styles = StyleSheet.create({
         color: "#808085",
     },
     logo: {
-        width: "50%",
-        height: "20%",
-        marginBottom: 40
+        width: 200,
+        height: 200,
+        position: 'absolute',
+        top: 120,
     },
 
     appName: {
@@ -109,23 +131,43 @@ const styles = StyleSheet.create({
         color: "#fb5b5a",
         marginBottom: 40
     },
-    inputView: {
+    inputView1: {
         width: "80%",
         backgroundColor: "white",
         borderRadius: 25,
         height: 50,
-        marginBottom: 20,
         justifyContent: "center",
         padding: 20,
+        position: 'absolute',
+        top: 350,
+    },
+    inputView2: {
+        width: "80%",
+        backgroundColor: "white",
+        borderRadius: 25,
+        height: 50,
+        justifyContent: "center",
+        padding: 20,
+        position: 'absolute',
+        top: 420,
+    },
+    inputView3: {
+        width: "80%",
+        backgroundColor: "white",
+        borderRadius: 25,
+        height: 50,
+        justifyContent: "center",
+        padding: 20,
+        position: 'absolute',
+        top: 490,
     },
     inputText: {
         height: 70,
 
     },
     goBack: {
-        color: "#808080",
-        fontSize: 14,
-        marginTop: 40,
+        position: 'absolute',
+        top: 700,  
     },
     signup: {
         width: "80%",
@@ -134,8 +176,8 @@ const styles = StyleSheet.create({
         height: 50,
         alignItems: "center",
         justifyContent: "center",
-        marginTop: 40,
-        marginBottom: 10
+        position: 'absolute',
+        top: 620   
 
     },
     loginText: {

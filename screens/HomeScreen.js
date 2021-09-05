@@ -1,5 +1,5 @@
 import React, { useState, useEffect, } from 'react'
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, ScrollView, AsyncStorage } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, ScrollView, AsyncStorage, Alert } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { FontAwesome5, MaterialCommunityIcons, FontAwesome, MaterialIcons, Entypo } from '@expo/vector-icons';
 import { fire, dbFirestore } from '../fire';
@@ -45,7 +45,6 @@ const HomeScreen = ({ route, navigation }) => {
                 }
             })
         setNotes(userNotes)
-
     }
 
     function deleteNote(currentDoc) {
@@ -56,31 +55,38 @@ const HomeScreen = ({ route, navigation }) => {
         getNotes();
     }
 
-
     function List() {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ScrollView style={{ marginTop: 10 }}>
-                    {notes != null ? notes.map((item, i) =>
-                        <Card style={styles.shadow}>
-                            <View style={styles.user}>
-                                <Card.Content style={{ flex: 1, flexDirection: "column" }}>
-                                    <Text style={styles.title}>{item.title}</Text>
-                                    <Text style={styles.body}>{item.body}</Text>
-                                    <FontAwesome onPress={() => { newNote(item) }} style={styles.edit} name="edit" size={32} color="rgb(50, 191, 104)" />
-                                    <MaterialIcons onPress={() => { deleteNote(item) }} style={styles.delete} name="delete-outline" size={36} color="rgb(191, 50, 76)" />
-                                </Card.Content>
-                            </View>
-                        </Card>
+                    {
+                        notes != null ?
+                            notes.sort((a, b) => a.date > b.date ? 1 : -1)
+                                .map((item, i) =>
+                                    <Card style={styles.shadow}>
+                                        <View style={styles.user}>
+                                            <Card.Content style={{ flex: 1, flexDirection: "column" }}>
+                                                <Text style={styles.title}>{item.title}</Text>
+                                                <Text style={styles.body}>{item.body}</Text>
+                                                <Text style={styles.date}>{item.date}</Text>
+                                                <FontAwesome onPress={() => { newNote(item) }} style={styles.edit} name="edit" size={32} color="rgb(50, 191, 104)" />
+                                                <MaterialIcons onPress={() => { deleteNote(item) }} style={styles.delete} name="delete-outline" size={36} color="rgb(191, 50, 76)" />
+                                            </Card.Content>
+                                        </View>
+                                    </Card>
 
-                    ) : <Text>No note</Text>}
+                                ) :
+                            <View style={styles.container}>
+                                <Text style={styles.nonotes}>You have no notes  🙄</Text>
+                                <Text style={styles.nonotes}>Please click the plus button at the bottom of the screen to add a new note</Text>
+                            </View>
+                    }
                 </ScrollView>
 
                 <TouchableOpacity onPress={newNote} style={styles.TouchableOpacityStyle} >
                     <MaterialCommunityIcons style={styles.newNote} name="plus-circle-outline" size={70} color="rgb(241 ,180, 23)" />
                 </TouchableOpacity>
             </View>
-
         );
     }
 
@@ -106,18 +112,19 @@ const HomeScreen = ({ route, navigation }) => {
                 <MapView style={{ width: "100%", height: "100%" }} initialRegion={{
                     latitude: 32.0794669,
                     longitude: 34.8148163,
-                    latitudeDelta: 12,
-                    longitudeDelta: 12,
+                    latitudeDelta: 3,
+                    longitudeDelta: 3,
                 }}>
                     {notes != null ? notes.map((item, i) =>
                         <Marker
                             coordinate={{ latitude: item.lat, longitude: item.lon }}
                             title={item.title}
                             description={item.body}
-                            onPress={() => { alert(item.title) }}
+                            onPress={() => { newNote(item) }}
                         ></Marker >
+                    ) : <Text>You have no notes.
+                        Please click the plus button at the bottom of the screen to add a new note</Text>}
 
-                    ) : <Text>No note</Text>}
                 </MapView>
             </View>
         );
@@ -137,10 +144,10 @@ const HomeScreen = ({ route, navigation }) => {
                 </View>
                 <View style={styles.profileView} >
                     <MaterialIcons name="format-list-numbered" size={35} color="black" />
-                    {notes != null ? 
+                    {notes != null ?
                         <Text style={styles.profileText}>  {notes.length}   (number of notes)</Text> :
                         <Text style={styles.profileText}>  0   (number of notes)</Text>
-                }
+                    }
                 </View>
                 <TouchableOpacity onPress={logOut} style={styles.logOut}>
                     <Text >Log Out</Text>
@@ -149,19 +156,35 @@ const HomeScreen = ({ route, navigation }) => {
         );
     }
     const logOut = async () => {
+        Alert.alert(
+            '😔',
+            'Are you sure you want to Log Out?',
+            [
+                {
+                    text: "No",
+                    onPress: () => console.log("Cancel Pressed"),
+                    style: "cancel"
+                },
+                {
+                    text: "Yes", onPress: async () => {
+                        try {
+                            const jsonValue = JSON.stringify(null)
+                            await AsyncStorage.setItem('@email', jsonValue)
+                            await AsyncStorage.setItem('@password', jsonValue)
+                        } catch (e) {
+                            // saving error
+                        }
 
-        try {
-            const jsonValue = JSON.stringify(null)
-            await AsyncStorage.setItem('@email', jsonValue)
-            await AsyncStorage.setItem('@password', jsonValue)
-        } catch (e) {
-            // saving error
-        }
+                        navigation.reset({
+                            index: 0,
+                            routes: [{ name: 'LoginScreen' }],
+                        })
+                    }
+                }
+            ],
+            { cancelable: false },
+        );
 
-        navigation.reset({
-            index: 0,
-            routes: [{ name: 'LoginScreen' }],
-        })
     }
 
     return (
@@ -195,12 +218,9 @@ const HomeScreen = ({ route, navigation }) => {
                         <FontAwesome5 name="user" size={24} color="black" />
                     ),
                 }}
-
             />
         </Tab.Navigator>
-
     )
-
 }
 
 export default HomeScreen
@@ -211,7 +231,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgb(241, 241, 241)',
         alignItems: 'center',
         justifyContent: 'center',
-
     },
 
     TouchableOpacityStyle: {
@@ -244,22 +263,27 @@ const styles = StyleSheet.create({
         fontSize: 25,
         color: "rgb(241 ,180, 23)",
         marginBottom: 5
-
     },
     body: {
         fontSize: 15,
         color: "black",
-
+    },
+    date: {
+        fontSize: 12,
+        color: "black",
+        position: 'relative',
+        left: "75%",
+        bottom: "45%"
     },
     edit: {
         position: 'relative',
         left: "90%",
-        top: "18%"
+
     },
     delete: {
         position: 'relative',
         left: "70%",
-        bottom: "10%",
+        bottom: "24%",
         width: 30
     },
     logOut: {
@@ -271,7 +295,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         position: 'absolute',
         bottom: 35
-
     },
     logo: {
         width: "50%",
@@ -288,13 +311,19 @@ const styles = StyleSheet.create({
         flexWrap: "wrap",
         alignSelf: "flex-start",
         marginLeft: 40,
-        marginTop:30
+        marginTop: 30
     },
     profileText: {
         color: "#808080",
         fontWeight: "bold",
         fontSize: 20,
-    }
-
+    },
+    nonotes: {
+        fontSize: 18,
+        color: "#808080",
+        paddingLeft: 20,
+        paddingBottom:20
+    },
+   
 
 });

@@ -1,41 +1,69 @@
-import React, { createContext, useState,useEffect } from 'react'
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, SafeAreaView,KeyboardAvoidingView } from 'react-native';
+import React, { useState, useEffect } from 'react'
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, Alert, AsyncStorage } from 'react-native';
 import fire from '../fire'
-import {HideWithKeyboard,ShowWithKeyboard } from 'react-native-hide-with-keyboard';
 
 const LoginScreen = ({ navigation }) => {
-    
-    const [email, setEmail] = useState({ value: ''})
-    const [password, setPassword] = useState({ value: ''})
-    var user=null;
 
-  /*   useEffect(() => {
-        autoLogin();
-      }, [autoLogin])
+    const [email, setEmail] = useState({ value: '' })
+    const [password, setPassword] = useState({ value: '' })
+    var user = null;
 
-      function autoLogin(){
-        if (user!=null) {
-            alert(user.email)
+    useEffect(() => {
+        getLocalUser()
+    }, [])
+
+    const storeLocalUser = async (e, p) => {
+        try {
+            await AsyncStorage.setItem('@email', e)
+            await AsyncStorage.setItem('@password', p)
+        } catch (e) {
+            console.log(e)
         }
-        else{
-            alert("else")
-        }
-      }
-       */
+    }
 
-    const loginBtn = () => {
-        console.log(email.value)
-        console.log(password.value)
-        fire.auth()
-            .signInWithEmailAndPassword(email.value, password.value)
+    const getLocalUser = async () => {
+        try {
+            let localEmail = await AsyncStorage.getItem('@email')
+            let localPassword = await AsyncStorage.getItem('@password')
+
+            if (localEmail != "null" && localPassword != "null") {
+                loginBtn(localEmail,localPassword)
+            }
+            
+
+        }
+        catch (e) {
+            // error reading value
+        }
+
+
+    }
+   
+
+    const loginBtn = async (e,p) => {
+        console.log(e+" "+p)
+        await fire.auth()
+            .signInWithEmailAndPassword(e, p)
             .then(() => {
                 fire.auth().onAuthStateChanged(authUser => {
                     if (authUser !== null) {
-                        user=authUser;
+                        user = authUser;
                         console.log(authUser)
+                        Alert.alert(
+                            'Welcome',
+                            'Hello ' + authUser.email,
+                            [
+                                { text: 'Ok' },
+
+                            ],
+                            { cancelable: false },
+                        );
+                        storeLocalUser(email.value, password.value);
                         navigation.navigate('HomeScreen', {
                             currentUser: authUser,
-                          });
+                        });
+
+
                     }
                 })
             })
@@ -53,13 +81,13 @@ const LoginScreen = ({ navigation }) => {
                         break;
                 }
 
-            });
+            }); 
     }
 
 
     return (
         <View style={styles.container}>
-        
+
             <Image
                 style={styles.logo}
                 source={require('../assets/moveoappLogo.png')}
@@ -80,7 +108,8 @@ const LoginScreen = ({ navigation }) => {
                     placeholderTextColor="#003f5c"
                     onChangeText={(text) => setPassword({ value: text })} />
             </View>
-            <TouchableOpacity onPress={loginBtn} style={styles.loginBtn}>
+            <TouchableOpacity  onPress={() => {loginBtn(email.value,password.value)}}
+            style={styles.loginBtn}>
                 <Text style={styles.loginText}>LOGIN</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('RegisterScreen')}>
@@ -102,11 +131,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
 
     },
-    headLine:{
+    headLine: {
         fontWeight: "bold",
         fontSize: 25,
-        position:'absolute',
-        top:65,
+        position: 'absolute',
+        top: 65,
         color: "#808085",
     },
     logo: {

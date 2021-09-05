@@ -1,18 +1,24 @@
-import React, { createContext, useState,useEffect } from 'react'
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, SafeAreaView, Modal } from 'react-native';
-import {fire,dbFirestore} from '../fire'
+import React, { useEffect } from 'react'
+import { StyleSheet, Text, View, TextInput, TouchableOpacity,Alert } from 'react-native';
+import { dbFirestore } from '../fire'
+import * as Location from 'expo-location';
+
 
 const NoteScreen = ({ route, navigation }) => {
-    const { currentUser,noteId } = route.params;
+    const { currentUser, noteId } = route.params;
     var note = [];
+    var location = [];
 
-    useEffect(() => {
-        if(noteId!=null){
+    useEffect(()  => {
+        if (noteId != null) {
             alert(noteId.id)
         }
+        
     }, [])
 
-    const saveNote = () => {
+    const saveNote  =  async () => {
+       await getLocation()
+       console.log(location)
         var date = new Date().getDate();
         let month = new Date().getMonth() + 1;
         let year = new Date().getFullYear();
@@ -21,23 +27,52 @@ const NoteScreen = ({ route, navigation }) => {
         if (note[1] && note[2] != null) {
             note[0] = currentUser.uid;
             note[3] = fullDate;
-            alert("Note added")
+            Alert.alert(
+                'Ok',
+                'Note successfully added',
+                [
+                  {text: 'Ok'},
+                
+                ],
+                {cancelable: false},
+              );
             dbFirestore.collection(note[0])
-            .add({
-                title: note[1],
-                body: note[2],
-                date: note[3]
-            })
-            .catch((err) => {
-                alert("Something went wrong - please try again")
-            })
-            navigation.goBack()
-            }
+                .add({
+                    title: note[1],
+                    body: note[2],
+                    date: note[3],
+                    lat: location[0],
+                    lon: location[1]
+                })
+                .catch((err) => {
+                    alert("Something went wrong - please try again")
+                })
+            navigation.navigate('HomeScreen', {
+                currentUser: currentUser,
+            });
+
+        }
         else {
             alert("One of the entries is missing")
         }
     }
-  
+
+    const getLocation = async () => {
+        let { status } = await Location.requestBackgroundPermissionsAsync();
+        console.log(status)
+        if (status !== 'granted') {
+            alert('You must enable location sharing to signup');
+            navigation.goBack()
+            return;
+        }
+            let loc = await Location.getCurrentPositionAsync({});
+            location[0] = await loc.coords.latitude;
+            location[1]  = await loc.coords.longitude;
+            
+
+    }
+
+
     return (
         <View style={styles.container}>
             <Text style={styles.headLine}>New Note</Text>

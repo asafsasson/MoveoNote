@@ -1,6 +1,8 @@
-import React, { createContext, useState } from 'react'
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, SafeAreaView } from 'react-native';
+import React, {useState } from 'react'
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
 import fire from '../fire'
+
+
 
 const RegisterScreen = ({ navigation }) => {
     const [email, setEmail] = useState({ value: '' })

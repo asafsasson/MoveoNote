@@ -26,9 +26,9 @@ const LoginScreen = ({ navigation }) => {
             let localEmail = await AsyncStorage.getItem('@email')
             let localPassword = await AsyncStorage.getItem('@password')
 
-            if (localEmail != "null" && localPassword != "null") {
+            if (localEmail != null && localPassword != null) {
                 loginBtn(localEmail, localPassword)
-            }
+            } 
         }
         catch (e) {
             console.log(e)

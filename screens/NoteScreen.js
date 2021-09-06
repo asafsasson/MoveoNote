@@ -4,8 +4,6 @@ import { dbFirestore } from '../fire'
 import * as Location from 'expo-location';
 import DatePicker from 'react-native-datepicker'
 
-/* new Date().getFullYear()+"-"+new Date().getMonth() + 1+"-"+new Date().getDate() */
-
 const NoteScreen = ({ route, navigation }) => {
     const { currentUser, noteId } = route.params;
     const [date, setDate] = useState(new Date().getFullYear()+"-"+(new Date().getMonth() +1)+"-"+new Date().getDate())
@@ -20,7 +18,6 @@ const NoteScreen = ({ route, navigation }) => {
             await getLocation()
             await setLat(location.coords.latitude)
             await setLon(location.coords.longitude)
-
         }
         loc()
     }, [])
@@ -85,9 +82,9 @@ const NoteScreen = ({ route, navigation }) => {
         }
     }
   
-
     const getLocation = async () => {
-        let { status } = await Location.requestBackgroundPermissionsAsync();
+        let { status } = await Location. requestForegroundPermissionsAsync();
+        console.log(status)
         if (status !== 'granted') {
             Alert.alert(
                 '🛰',
@@ -102,7 +99,7 @@ const NoteScreen = ({ route, navigation }) => {
         }
         location = await Location.getLastKnownPositionAsync({
             accuracy: 6,
-        });
+        }); 
     }
 
     const deleteNote = async () => {

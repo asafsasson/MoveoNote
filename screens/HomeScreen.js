@@ -61,8 +61,8 @@ const HomeScreen = ({ route, navigation }) => {
                     {
                         notes != null ?
                             notes.sort((a, b) => a.date > b.date ? 1 : -1)
-                                .map((item, i) =>
-                                    <Card style={styles.shadow}>
+                                .map((item) =>
+                                    <Card style={styles.shadow}   key={item.title+item.body+item.date}>
                                         <View style={styles.user}>
                                             <Card.Content style={{ flex: 1, flexDirection: "column" }}>
                                                 <Text style={styles.title}>{item.title}</Text>
@@ -115,15 +115,15 @@ const HomeScreen = ({ route, navigation }) => {
                         latitudeDelta: 3,
                         longitudeDelta: 3,
                     }}>
-                        {notes != null ? notes.map((item, i) =>
+                        {notes.map((item) =>
                             <Marker
+                            key={item.title+item.body+item.date}
                                 coordinate={{ latitude: item.lat, longitude: item.lon }}
                                 title={item.title}
                                 description={item.body}
                                 onPress={() => { newNote(item) }}
                             ></Marker >
-                        ) : <Text>You have no notes.
-                            Please click the plus button at the bottom of the screen to add a new note</Text>}
+                        ) }
 
                     </MapView> :
                     <View style={styles.container1}>
@@ -175,8 +175,9 @@ const HomeScreen = ({ route, navigation }) => {
                     text: "Yes", onPress: async () => {
                         try {
                             const jsonValue = JSON.stringify(null)
-                            await AsyncStorage.setItem('@email', jsonValue)
-                            await AsyncStorage.setItem('@password', jsonValue)
+                            await AsyncStorage.removeItem('@email');
+                            await AsyncStorage.removeItem('@password');
+                         
                         } catch (e) {
                             // saving error
                         }

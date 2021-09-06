@@ -10,8 +10,6 @@ export const emailContext = createContext();
 import { LoginScreen,NoteScreen,RegisterScreen } from './screens';
 import HomeScreen from './screens/HomeScreen';
 
-console.disableYellowBox = true;
-
 const App = () => {
   return (
     <NavigationContainer>
@@ -31,9 +29,6 @@ const App = () => {
     </NavigationContainer>
   )
 }
-
-
-
 
 
 export default App;

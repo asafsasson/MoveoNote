@@ -12,7 +12,6 @@ const HomeScreen = ({ route, navigation }) => {
     const { currentUser } = route.params;
     const [notes, setNotes] = useState(null)
 
-
     useEffect(() => {
         getNotes()
     }, [])
@@ -109,23 +108,30 @@ const HomeScreen = ({ route, navigation }) => {
     function Map() {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <MapView style={{ width: "100%", height: "100%" }} initialRegion={{
-                    latitude: 32.0794669,
-                    longitude: 34.8148163,
-                    latitudeDelta: 3,
-                    longitudeDelta: 3,
-                }}>
-                    {notes != null ? notes.map((item, i) =>
-                        <Marker
-                            coordinate={{ latitude: item.lat, longitude: item.lon }}
-                            title={item.title}
-                            description={item.body}
-                            onPress={() => { newNote(item) }}
-                        ></Marker >
-                    ) : <Text>You have no notes.
-                        Please click the plus button at the bottom of the screen to add a new note</Text>}
+                {notes != null ?
+                    <MapView style={{ width: "100%", height: "100%" }} initialRegion={{
+                        latitude: 32.0794669,
+                        longitude: 34.8148163,
+                        latitudeDelta: 3,
+                        longitudeDelta: 3,
+                    }}>
+                        {notes != null ? notes.map((item, i) =>
+                            <Marker
+                                coordinate={{ latitude: item.lat, longitude: item.lon }}
+                                title={item.title}
+                                description={item.body}
+                                onPress={() => { newNote(item) }}
+                            ></Marker >
+                        ) : <Text>You have no notes.
+                            Please click the plus button at the bottom of the screen to add a new note</Text>}
 
-                </MapView>
+                    </MapView> :
+                    <View style={styles.container1}>
+                        <Text style={styles.nonotes}>You have no notes  🙄</Text>
+                        <Text style={styles.nonotes}>Please click the plus button at the list screen to add a new note</Text>
+                    </View>
+                }
+
             </View>
         );
     }
@@ -232,7 +238,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-
     TouchableOpacityStyle: {
         position: 'absolute',
         alignItems: 'center',
@@ -253,6 +258,12 @@ const styles = StyleSheet.create({
         width: 350,
         borderRadius: 15
     },
+    container1: {
+        flex: 1,
+        backgroundColor: 'rgb(241, 241, 241)',
+        alignItems: 'center',
+        paddingTop:10
+    },
     user: {
         flexDirection: 'row',
         marginTop: 8,
@@ -260,12 +271,12 @@ const styles = StyleSheet.create({
     },
     title: {
         fontWeight: "bold",
-        fontSize: 25,
+        fontSize: 20,
         color: "rgb(241 ,180, 23)",
         marginBottom: 5
     },
     body: {
-        fontSize: 15,
+        fontSize: 12,
         color: "black",
     },
     date: {
@@ -322,8 +333,9 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: "#808080",
         paddingLeft: 20,
-        paddingBottom:20
+        paddingBottom: 20,
+    
     },
-   
+
 
 });

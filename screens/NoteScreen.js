@@ -4,11 +4,11 @@ import { dbFirestore } from '../fire'
 import * as Location from 'expo-location';
 import DatePicker from 'react-native-datepicker'
 
+/* new Date().getFullYear()+"-"+new Date().getMonth() + 1+"-"+new Date().getDate() */
 
 const NoteScreen = ({ route, navigation }) => {
     const { currentUser, noteId } = route.params;
-
-    const [date, setDate] = useState(null)
+    const [date, setDate] = useState(new Date().getFullYear()+"-"+(new Date().getMonth() +1)+"-"+new Date().getDate())
     const [title, setTitle] = useState(null)
     const [body, setBody] = useState(null)
     const [lon, setLon] = useState(null)
@@ -48,7 +48,7 @@ const NoteScreen = ({ route, navigation }) => {
             );
         }
         else {
-            if (title && body && date != null) {
+            if (title && body != null) {
                 dbFirestore.collection(currentUser.uid)
                     .add({
                         title: title,
@@ -84,6 +84,7 @@ const NoteScreen = ({ route, navigation }) => {
             }
         }
     }
+  
 
     const getLocation = async () => {
         let { status } = await Location.requestBackgroundPermissionsAsync();
@@ -129,28 +130,17 @@ const NoteScreen = ({ route, navigation }) => {
                     onChangeText={(text) => setTitle(text)} />
             </View>
             <DatePicker
+
+
                 style={styles.date}
                 date={date}
                 mode="date"
-                placeholder=
-                {noteId != null ? noteId.date : "select date"}
+                placeholder= {noteId != null ? noteId.date : ""}
                 format="YYYY-MM-DD"
                 minDate="2015-05-01"
                 maxDate="2025-06-01"
                 confirmBtnText="Confirm"
                 cancelBtnText="Cancel"
-                /*  customStyles={{
-                     dateIcon: {
-                         position: 'absolute',
-                         left: 0,
-                         top: 4,
-                         marginLeft: 0
-                     },
-                     dateInput: {
-                         marginLeft: 36
-                     }
-                     // ... You can check the source to find the other keys.
-                 }} */
                 onDateChange={(date) => setDate(date)} />
 
 
@@ -166,8 +156,8 @@ const NoteScreen = ({ route, navigation }) => {
                 {noteId != null ? <Text >Update</Text> : <Text >Save</Text>}
             </TouchableOpacity>
             <TouchableOpacity onPress={() => deleteNote()} style={styles.deleteText}>
-            {noteId != null ? <Text >Delete</Text> : <Text >Go Back</Text>}
-             
+                {noteId != null ? <Text >Delete</Text> : <Text >Go Back</Text>}
+
             </TouchableOpacity>
         </View>
     )
